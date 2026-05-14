@@ -1,34 +1,62 @@
 {
-  "profiles": [
+  "meta": {
+    "estimated_usd_per_chatgpt_variation": 0.04
+  },
+  "tones": [
     {
+      "id": "professional_educational",
       "name": "Professional Educational",
-      "use_when": ["tutorial", "educational", "technical"],
-      "description": "Formal, informative, and authoritative.",
-      "variation_count": 3
+      "description": "Formal, academic, authoritative",
+      "best_for": ["tutorial", "educational", "technical"],
+      "variations": [
+        "Rewrite in a formal, precise voice suitable for an online course. Keep structure but tighten wording and add one clear definition where helpful.",
+        "Same facts, but sound like a senior lecturer: measured pacing, minimal slang, explicit signposting between sections.",
+        "Academic-adjacent tone: cite-style phrasing without fake citations, emphasize accuracy and transferable takeaways."
+      ]
     },
     {
+      "id": "conversational_storytelling",
       "name": "Conversational Storytelling",
-      "use_when": ["lifestyle", "opinion", "entertainment"],
-      "description": "Casual, relatable, and narrative-driven.",
-      "variation_count": 3
+      "description": "Friendly, engaging, story-driven",
+      "best_for": ["entertainment", "lifestyle", "personal story"],
+      "variations": [
+        "Rewrite as if talking to a friend over coffee: warm asides, light humor, and one short anecdotal beat.",
+        "Story-first: open with a tiny scene, weave the lesson through that frame, keep sentences mostly short.",
+        "Relatable host energy: second person, occasional rhetorical questions, end sections with a reflective hook."
+      ]
     },
     {
+      "id": "energetic_motivational",
       "name": "Energetic Motivational",
-      "use_when": ["self-help", "news", "motivation"],
-      "description": "High-energy, action-oriented, and uplifting.",
-      "variation_count": 3
+      "description": "Upbeat, inspiring, high-energy",
+      "best_for": ["fitness", "motivation", "self-help"],
+      "variations": [
+        "High-energy coach voice: strong verbs, momentum-building cadence, one rallying metaphor.",
+        "Inspirational but not cheesy: concrete wins, forward-looking CTA, punchy one-liners sparingly.",
+        "Action-bias: imperative openings, micro-challenges for the viewer, upbeat transitions between beats."
+      ]
     },
     {
+      "id": "curious_explainer",
       "name": "Curious Explainer",
-      "use_when": ["documentary", "news", "deep-dive"],
-      "description": "Discovery-focused with suspense and wonder.",
-      "variation_count": 2
+      "description": "Curious, wondering, investigative",
+      "best_for": ["mystery", "discovery", "how-it-works"],
+      "variations": [
+        "Investigative explainer: pose mysteries, reveal in layers, use 'here is what surprised us' framing.",
+        "Wonder-led pacing: what-if hooks, slow reveals, plain-language analogies for complex bits.",
+        "Discovery tone: emphasize the journey of figuring it out; keep stakes curious rather than alarmist."
+      ]
     },
     {
-      "name": "Quick and Direct",
-      "use_when": ["quick-tips", "summary", "how-to"],
-      "description": "Concise and practical with minimal filler.",
-      "variation_count": 2
+      "id": "quick_direct",
+      "name": "Quick & Direct",
+      "description": "Fast-paced, concise, to-the-point",
+      "best_for": ["quick tips", "hacks", "news"],
+      "variations": [
+        "Cut fluff: shorter sentences, numbered beats where possible, one-line summary after each major point.",
+        "News-desk crispness: lead with the payoff, tight transitions, no meandering anecdotes.",
+        "Hacks format: rapid-fire tips, bold claims only when supported in-script, strong final checklist."
+      ]
     }
   ]
 }

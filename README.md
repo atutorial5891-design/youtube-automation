@@ -137,6 +137,9 @@ uv run --extra dev pytest tests/test_script_generator.py -v
 
 # Stage 2 Gate 2 agent verifier (OpenAI JSON scoring)
 uv run --extra dev pytest tests/test_agent_verifier.py -v
+
+# Stage 2 tone manager (library + OpenAI variations)
+uv run --extra dev pytest tests/test_tone_manager.py -v
 ```
 
 ### 6. Smoke-test external APIs (optional, needs credentials)
@@ -223,7 +226,7 @@ Cheap, high-volume analytical work is separated from quality-critical creative w
 - **`DeepSeekClient`** (`src/api/deepseek_client.py`) — `requests`-based chat completions for `generate_topic` / `create_outline` only (built-in HTTP retries). Returns `None` on hard failure (logged).
 - **`ChatGPTClient`** (`src/api/chatgpt_client.py`) — OpenAI or Anthropic SDK for `write_script` (hook/body/CTA instructions); raises `ExternalServiceError` on failure (no client-side retries).
 - **`AgentVerifier`** (`src/quality/agent_verifier.py`) — **Gate 2**: OpenAI-only structured JSON scoring (`clarity` / `flow` / `engagement` 0–100, `issues_count` for critical issues only). **PASS** when clarity ≥80, flow ≥80, engagement ≥70, and `issues_count == 0`. Prompts from `config/agent_prompts.json` (`verification`). One API call per `verify_script()`; orchestration should target **≥80% first-pass** and may retry the **script** up to **`AgentVerifier.MAX_SCRIPT_RETRIES` (3)** times total per gate design. Optional keyword `attempt=` labels the returned dict.
-- **`ToneManager`** — tone profile and 2–3 variations.
+- **`ToneManager`** (`src/generation/tone_manager.py`) — loads ``config/tone_library.json`` (``tones`` array with ``id``, ``best_for``, ``variations``). Heuristic ``identify_content_type(script)``, ``get_applicable_tones``, ``select_random_tone`` (fallback ``professional_educational``), and ``generate_variations`` via OpenAI (2–3 rewrites). Tracks ``last_variation_cost_usd`` using ``meta.estimated_usd_per_chatgpt_variation``. Tests: ``pytest tests/test_tone_manager.py -v``.
 - **`FactChecker`** — risky claims before publish.
 - **`VideoAssembler`** — render plan and output.
 - **`YouTubeClient`** — upload readiness and publish.
@@ -289,6 +292,7 @@ Agent verification -> Fact-check -> Human final review
 - **`VideoProductionOrchestrator`**: pass a path to the `config` directory or to `config/settings.json`. Use `generate_video(topic=..., category=...)` for a single run, or `run_pipeline()` to use `orchestrator.default_topic` and `orchestrator.default_category` from `settings.json`. The orchestrator returns a single metadata dict (`success`, `video_path`, `script`, `topic`, `tone_used`, `agent_verification_passed`, `timestamp`, `duration_seconds`, plus `error` / `failed_step` on failure) and logs each step at INFO (or DEBUG when `orchestrator.verbose` is true).
 - **Hybrid script generation (Stage 2, session 2)**: configure `hybrid_generation.*_usd` cost estimates in `settings.json`. Run `uv run --extra dev pytest tests/test_script_generator.py -v`.
 - **Agent verification (Stage 2, session 3 / Gate 2)**: `AgentVerifier(chatgpt_key, model=...)`. Run `uv run --extra dev pytest tests/test_agent_verifier.py -v`.
+- **Tone variation (Stage 2, session 4)**: `ToneManager(tone_library_path=..., chatgpt_key=...)`, `config/tone_library.json`. Run `uv run --extra dev pytest tests/test_tone_manager.py -v`.
 - **Automated tests**: `uv run --extra dev pytest tests/test_orchestrator.py -v`
 
 ### Stage 1 scope (current repo)
