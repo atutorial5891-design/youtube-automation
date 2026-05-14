@@ -131,6 +131,9 @@ uv run --extra dev pytest tests/test_llm_gateway_keys.py::TestLLMGatewaySecretsP
 
 # Stage 2 orchestrator + config loader
 uv run --extra dev pytest tests/test_orchestrator.py -v
+
+# Stage 2 hybrid script generator (DeepSeek + OpenAI/Anthropic)
+uv run --extra dev pytest tests/test_script_generator.py -v
 ```
 
 ### 6. Smoke-test external APIs (optional, needs credentials)
@@ -213,9 +216,9 @@ Cheap, high-volume analytical work is separated from quality-critical creative w
 
 ### Components
 
-- **`HybridScriptGenerator`** — DeepSeek research plus a higher-quality writing model.
-- **`DeepSeekClient`** — API key from `get_deepseek_api_key_with_openai_fallback()` unless overridden.
-- **`ChatGPTClient`** — OpenAI configured when `get_openai_api_key()` returns a value.
+- **`HybridScriptGenerator`** (`src/generation/script_generator.py`) — DeepSeek for **topic + outline only**; OpenAI or Anthropic (`ChatGPTClient`) for **final script only**, per `docs/API_ALLOCATION_BY_STAGE.md`. Estimated USD split is read from `hybrid_generation` in `config/settings.json`. Constructor: `HybridScriptGenerator(deepseek_key, chatgpt_key, chatgpt_model=..., writing_provider="openai"|"anthropic")`. Raises `ExternalServiceError` if DeepSeek fails after one hybrid-level retry on topic/outline; writing errors propagate for orchestrator retries.
+- **`DeepSeekClient`** (`src/api/deepseek_client.py`) — `requests`-based chat completions for `generate_topic` / `create_outline` only (built-in HTTP retries). Returns `None` on hard failure (logged).
+- **`ChatGPTClient`** (`src/api/chatgpt_client.py`) — OpenAI or Anthropic SDK for `write_script` (hook/body/CTA instructions); raises `ExternalServiceError` on failure (no client-side retries).
 - **`AgentVerifier`** — clarity, flow, engagement, risk.
 - **`ToneManager`** — tone profile and 2–3 variations.
 - **`FactChecker`** — risky claims before publish.
@@ -281,6 +284,7 @@ Agent verification -> Fact-check -> Human final review
 ### Stage 2 scope (orchestrator + config)
 
 - **`VideoProductionOrchestrator`**: pass a path to the `config` directory or to `config/settings.json`. Use `generate_video(topic=..., category=...)` for a single run, or `run_pipeline()` to use `orchestrator.default_topic` and `orchestrator.default_category` from `settings.json`. The orchestrator returns a single metadata dict (`success`, `video_path`, `script`, `topic`, `tone_used`, `agent_verification_passed`, `timestamp`, `duration_seconds`, plus `error` / `failed_step` on failure) and logs each step at INFO (or DEBUG when `orchestrator.verbose` is true).
+- **Hybrid script generation (Stage 2, session 2)**: configure `hybrid_generation.*_usd` cost estimates in `settings.json`. Run `uv run --extra dev pytest tests/test_script_generator.py -v`.
 - **Automated tests**: `uv run --extra dev pytest tests/test_orchestrator.py -v`
 
 ### Stage 1 scope (current repo)
