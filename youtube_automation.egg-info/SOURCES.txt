@@ -1,3 +1,4 @@
+LICENSE
 README.md
 pyproject.toml
 src/__init__.py
@@ -29,6 +30,7 @@ src/video/video_validator.py
 tests/test_agent_verifier.py
 tests/test_api_setup.py
 tests/test_llm_gateway_keys.py
+tests/test_orchestrator.py
 tests/test_script_generator.py
 tests/test_video_pipeline.py
 tests/test_youtube_integration.py

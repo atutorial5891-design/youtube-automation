@@ -128,6 +128,9 @@ uv run --extra dev pytest tests/test_api_setup.py -v
 # LLM keychain resolution + masked print demo (use -s to see prints)
 uv run --extra dev pytest tests/test_llm_gateway_keys.py -v
 uv run --extra dev pytest tests/test_llm_gateway_keys.py::TestLLMGatewaySecretsPrintIntegration -s
+
+# Stage 2 orchestrator + config loader
+uv run --extra dev pytest tests/test_orchestrator.py -v
 ```
 
 ### 6. Smoke-test external APIs (optional, needs credentials)
@@ -218,7 +221,9 @@ Cheap, high-volume analytical work is separated from quality-critical creative w
 - **`FactChecker`** — risky claims before publish.
 - **`VideoAssembler`** — render plan and output.
 - **`YouTubeClient`** — upload readiness and publish.
-- **`Orchestrator`** — coordination, retries, gates.
+- **`VideoProductionOrchestrator`** (`src/core/orchestrator.py`) — Stage 2 pipeline coordinator (topic → script → agent verify → tone → TTS → images → assembly). External clients are still placeholders where noted in code; behavior and defaults are driven from `config/settings.json` under `orchestrator`.
+- **`ConfigLoader`** (`src/core/config_loader.py`) — loads `settings.json`, `agent_prompts.json`, and `script_prompts.json` at construction; dotted `get_setting()` paths; `load_json()` / `load_tones()` for other config files.
+- **`Orchestrator`** — Stage 1 scaffold used by `scripts/run_stage_1.py`.
 
 ### Data flow
 
@@ -272,6 +277,11 @@ Agent verification -> Fact-check -> Human final review
 - Shared logic: `config/` and `src/`.
 - Overrides via `config_loader.py` without changing the core flow.
 - Logs and analytics partitioned for multi-channel use.
+
+### Stage 2 scope (orchestrator + config)
+
+- **`VideoProductionOrchestrator`**: pass a path to the `config` directory or to `config/settings.json`. Use `generate_video(topic=..., category=...)` for a single run, or `run_pipeline()` to use `orchestrator.default_topic` and `orchestrator.default_category` from `settings.json`. The orchestrator returns a single metadata dict (`success`, `video_path`, `script`, `topic`, `tone_used`, `agent_verification_passed`, `timestamp`, `duration_seconds`, plus `error` / `failed_step` on failure) and logs each step at INFO (or DEBUG when `orchestrator.verbose` is true).
+- **Automated tests**: `uv run --extra dev pytest tests/test_orchestrator.py -v`
 
 ### Stage 1 scope (current repo)
 

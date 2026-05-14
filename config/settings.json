@@ -29,5 +29,16 @@
     "max_retries": 3,
     "max_videos_per_day": 7,
     "agent_accuracy_threshold": 0.8
+  },
+  "orchestrator": {
+    "default_topic": "Why small habits compound faster than big goals",
+    "default_category": "general",
+    "log_level": "INFO",
+    "verbose": false,
+    "video_output_relative": "data/videos",
+    "placeholder_video_basename": "stage2_placeholder.mp4",
+    "placeholder_tone": "engaging",
+    "placeholder_agent_pass": true,
+    "placeholder_script_template": "[HOOK]\nGrab attention on: {topic}\n\n[BODY]\nCategory: {category}. Placeholder script for pipeline wiring.\n\n[OUTRO]\nSubscribe for more."
   }
 }
