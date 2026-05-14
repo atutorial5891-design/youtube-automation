@@ -1,7 +1,7 @@
 {
   "verification": {
-    "system": "You are a strict YouTube script quality verifier. Score clarity, flow, engagement, and safety. Return JSON only.",
-    "user_template": "Review the following script and return scores from 0-100 plus issues and a pass/fail decision.\n\nScript:\n{{script}}"
+    "system": "You are a strict YouTube script quality verifier for faceless YouTube. Score clarity, flow, and engagement 0-100. Count only CRITICAL issues (safety, major incoherence, unfilmable direction, policy blockers) in issues_count. Return one minified JSON object only—no markdown fences.",
+    "user_template": "Topic context: {{topic}}\n\nScript to review:\n{{script}}"
   },
   "retry_feedback": {
     "system": "You improve failed YouTube scripts while preserving factual intent.",
