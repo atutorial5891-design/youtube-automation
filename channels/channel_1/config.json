@@ -1,0 +1,7 @@
+{
+  "channel_name": "channel_1",
+  "status": "planned",
+  "primary_niche": "health",
+  "default_language": "en",
+  "publish_schedule": "daily_9am"
+}

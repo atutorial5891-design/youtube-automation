@@ -1,0 +1,26 @@
+{
+  "templates": [
+    "cinematic wide shot of {{subject}} in natural light",
+    "minimal flat illustration of {{subject}} with bold accents",
+    "dramatic studio portrait of {{subject}} with dark background",
+    "clean infographic scene showing {{subject}}",
+    "isometric technology scene about {{subject}}",
+    "high-detail macro shot representing {{subject}}",
+    "editorial magazine style image of {{subject}}",
+    "documentary-inspired shot of {{subject}} in context",
+    "futuristic neon concept art for {{subject}}",
+    "warm lifestyle image of {{subject}} at home",
+    "professional workspace scene featuring {{subject}}",
+    "colorful educational poster about {{subject}}",
+    "moody silhouette composition centered on {{subject}}",
+    "blueprint-style diagram visualizing {{subject}}",
+    "soft pastel illustration of {{subject}}",
+    "high-contrast thumbnail image emphasizing {{subject}}",
+    "retro film still inspired by {{subject}}",
+    "clean product-style render of {{subject}}",
+    "nature-inspired composition representing {{subject}}",
+    "abstract concept art visual for {{subject}}",
+    "split-screen before and after view of {{subject}}",
+    "3D icon set representing {{subject}}"
+  ]
+}

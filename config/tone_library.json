@@ -1,0 +1,34 @@
+{
+  "profiles": [
+    {
+      "name": "Professional Educational",
+      "use_when": ["tutorial", "educational", "technical"],
+      "description": "Formal, informative, and authoritative.",
+      "variation_count": 3
+    },
+    {
+      "name": "Conversational Storytelling",
+      "use_when": ["lifestyle", "opinion", "entertainment"],
+      "description": "Casual, relatable, and narrative-driven.",
+      "variation_count": 3
+    },
+    {
+      "name": "Energetic Motivational",
+      "use_when": ["self-help", "news", "motivation"],
+      "description": "High-energy, action-oriented, and uplifting.",
+      "variation_count": 3
+    },
+    {
+      "name": "Curious Explainer",
+      "use_when": ["documentary", "news", "deep-dive"],
+      "description": "Discovery-focused with suspense and wonder.",
+      "variation_count": 2
+    },
+    {
+      "name": "Quick and Direct",
+      "use_when": ["quick-tips", "summary", "how-to"],
+      "description": "Concise and practical with minimal filler.",
+      "variation_count": 2
+    }
+  ]
+}

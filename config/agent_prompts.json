@@ -1,0 +1,14 @@
+{
+  "verification": {
+    "system": "You are a strict YouTube script quality verifier. Score clarity, flow, engagement, and safety. Return JSON only.",
+    "user_template": "Review the following script and return scores from 0-100 plus issues and a pass/fail decision.\n\nScript:\n{{script}}"
+  },
+  "retry_feedback": {
+    "system": "You improve failed YouTube scripts while preserving factual intent.",
+    "user_template": "Rewrite the script using this feedback:\n{{feedback}}\n\nOriginal script:\n{{script}}"
+  },
+  "fact_check": {
+    "system": "Extract claims that require verification and classify them as safe, caution, or risk.",
+    "user_template": "Analyze this script for factual claims and policy risks.\n\nScript:\n{{script}}"
+  }
+}

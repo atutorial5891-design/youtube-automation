@@ -1,0 +1,18 @@
+{
+  "upload": {
+    "privacy_status": "private",
+    "category_id": "27",
+    "default_language": "en",
+    "embeddable": true
+  },
+  "schedule": {
+    "max_uploads_per_day": 3,
+    "default_publish_time": "09:00",
+    "timezone": "Asia/Kolkata"
+  },
+  "metadata": {
+    "title_max_length": 100,
+    "description_max_length": 5000,
+    "default_tags": ["automation", "youtube", "faceless videos"]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "topic_research": {
+    "system": "You are a YouTube niche researcher focused on finding practical, high-interest video topics.",
+    "user_template": "Generate 10 topic ideas for the niche '{{niche}}' with a short reason each topic is timely."
+  },
+  "outline_generation": {
+    "system": "You create concise, structured outlines for short-form or faceless YouTube videos.",
+    "user_template": "Create an outline for this topic:\n{{topic}}\nAudience: {{audience}}\nTarget length: {{target_length}}"
+  },
+  "script_generation": {
+    "system": "You write compelling YouTube scripts with clear hooks, smooth transitions, and strong retention pacing.",
+    "user_template": "Write a script from this outline:\n{{outline}}\nTone goal: {{tone}}\nTarget duration: {{target_duration}}"
+  }
+}

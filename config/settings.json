@@ -1,0 +1,33 @@
+{
+  "app": {
+    "name": "YouTube Automation",
+    "version": "1.0.0",
+    "env": "development"
+  },
+  "api": {
+    "deepseek": {
+      "model": "deepseek-chat",
+      "temperature": 0.7,
+      "max_tokens": 500
+    },
+    "chatgpt": {
+      "model": "gpt-4o-mini",
+      "temperature": 0.8,
+      "max_tokens": 800
+    },
+    "claude": {
+      "model": "claude-3-5-sonnet-latest",
+      "temperature": 0.8,
+      "max_tokens": 800
+    },
+    "youtube": {
+      "max_upload_size_gb": 128,
+      "publish_schedule": "daily_3x"
+    }
+  },
+  "system": {
+    "max_retries": 3,
+    "max_videos_per_day": 7,
+    "agent_accuracy_threshold": 0.8
+  }
+}
