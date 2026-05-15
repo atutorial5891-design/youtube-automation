@@ -195,6 +195,25 @@ def test_api_split_in_output(tmp_path: Path) -> None:
     assert out["api_cost"] == pytest.approx(0.13)
 
 
+def test_generate_script_with_locked_topic_skips_topic_generation(
+    tmp_path: Path,
+) -> None:
+    """When ``topic`` is provided, DeepSeek topic generation is skipped."""
+    _write_config_bundle(tmp_path)
+    loader = ConfigLoader(str(tmp_path))
+
+    with patch.object(DeepSeekClient, "generate_topic") as mock_topic, patch.object(
+        DeepSeekClient, "create_outline", return_value="Outline body"
+    ), patch.object(ChatGPTClient, "write_script", return_value="Final script"):
+        gen = HybridScriptGenerator("ds", "cg", config_loader=loader)
+        out = gen.generate_script("tech", topic="Locked title")
+
+    mock_topic.assert_not_called()
+    assert out["topic"] == "Locked title"
+    assert out["api_split"]["deepseek"] == pytest.approx(0.02)
+    assert out["api_split"]["chatgpt"] == pytest.approx(0.1)
+
+
 def test_error_handling_deepseek(tmp_path: Path) -> None:
     """Hybrid retries DeepSeek topic once, then raises if still empty."""
     _write_config_bundle(tmp_path)

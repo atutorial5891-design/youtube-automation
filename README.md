@@ -230,7 +230,7 @@ Cheap, high-volume analytical work is separated from quality-critical creative w
 - **`FactChecker`** — risky claims before publish.
 - **`VideoAssembler`** — render plan and output.
 - **`YouTubeClient`** — upload readiness and publish.
-- **`VideoProductionOrchestrator`** (`src/core/orchestrator.py`) — Stage 2 pipeline coordinator (topic → script → agent verify → tone → TTS → images → assembly). External clients are still placeholders where noted in code; behavior and defaults are driven from `config/settings.json` under `orchestrator`.
+- **`VideoProductionOrchestrator`** (`src/core/orchestrator.py`) — Stage 2 pipeline (topic → script → agent verify → tone → TTS → images → assembly). Set ``orchestrator.use_live_stage2_pipeline`` to ``true`` plus DeepSeek/OpenAI keys to run :class:`HybridScriptGenerator`, Gate 2 :class:`AgentVerifier` (up to ``1 + MAX_SCRIPT_RETRIES`` attempts), and :class:`ToneManager` for ``tone_used``; otherwise placeholders and ``placeholder_*`` settings apply. Defaults in ``config/settings.json`` under ``orchestrator``.
 - **`ConfigLoader`** (`src/core/config_loader.py`) — loads `settings.json`, `agent_prompts.json`, and `script_prompts.json` at construction; dotted `get_setting()` paths; `load_json()` / `load_tones()` for other config files.
 - **`Orchestrator`** — Stage 1 scaffold used by `scripts/run_stage_1.py`.
 
@@ -289,7 +289,7 @@ Agent verification -> Fact-check -> Human final review
 
 ### Stage 2 scope (orchestrator + config)
 
-- **`VideoProductionOrchestrator`**: pass a path to the `config` directory or to `config/settings.json`. Use `generate_video(topic=..., category=...)` for a single run, or `run_pipeline()` to use `orchestrator.default_topic` and `orchestrator.default_category` from `settings.json`. The orchestrator returns a single metadata dict (`success`, `video_path`, `script`, `topic`, `tone_used`, `agent_verification_passed`, `timestamp`, `duration_seconds`, plus `error` / `failed_step` on failure) and logs each step at INFO (or DEBUG when `orchestrator.verbose` is true).
+- **`VideoProductionOrchestrator`**: pass a path to the `config` directory or to `config/settings.json`. Use `generate_video(topic=..., category=...)` or `run_pipeline()`. With `orchestrator.use_live_stage2_pipeline: true` and keys configured, hybrid script + Gate 2 verification + tone selection run for real; otherwise placeholders are used. Returns the usual metadata dict (including `error` / `failed_step` on failure). Logs at INFO or DEBUG when `orchestrator.verbose` is true.
 - **Hybrid script generation (Stage 2, session 2)**: configure `hybrid_generation.*_usd` cost estimates in `settings.json`. Run `uv run --extra dev pytest tests/test_script_generator.py -v`.
 - **Agent verification (Stage 2, session 3 / Gate 2)**: `AgentVerifier(chatgpt_key, model=...)`. Run `uv run --extra dev pytest tests/test_agent_verifier.py -v`.
 - **Tone variation (Stage 2, session 4)**: `ToneManager(tone_library_path=..., chatgpt_key=...)`, `config/tone_library.json`. Run `uv run --extra dev pytest tests/test_tone_manager.py -v`.

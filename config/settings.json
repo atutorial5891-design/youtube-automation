@@ -44,6 +44,7 @@
     "placeholder_video_basename": "stage2_placeholder.mp4",
     "placeholder_tone": "engaging",
     "placeholder_agent_pass": true,
-    "placeholder_script_template": "[HOOK]\nGrab attention on: {topic}\n\n[BODY]\nCategory: {category}. Placeholder script for pipeline wiring.\n\n[OUTRO]\nSubscribe for more."
+    "placeholder_script_template": "[HOOK]\nGrab attention on: {topic}\n\n[BODY]\nCategory: {category}. Placeholder script for pipeline wiring.\n\n[OUTRO]\nSubscribe for more.",
+    "use_live_stage2_pipeline": false
   }
 }

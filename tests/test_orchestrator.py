@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -40,6 +40,78 @@ def _write_minimal_configs(target_dir: Path) -> None:
         json.dumps({"script_generation": {"system": "test"}}),
         encoding="utf-8",
     )
+
+
+def _write_minimal_tone_library(target_dir: Path) -> None:
+    """Minimal ``tone_library.json`` for live orchestrator wiring tests."""
+    lib = {
+        "meta": {"estimated_usd_per_chatgpt_variation": 0.01},
+        "tones": [
+            {
+                "id": "professional_educational",
+                "name": "Professional Educational",
+                "description": "Formal",
+                "best_for": ["tutorial"],
+                "variations": ["v1", "v2", "v3"],
+            }
+        ],
+    }
+    (target_dir / "tone_library.json").write_text(json.dumps(lib), encoding="utf-8")
+
+
+def test_generate_video_live_stage2_uses_hybrid_verifier_tone(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Live Stage 2 path calls hybrid + verifier + tone manager (all mocked)."""
+    _write_minimal_configs(tmp_path)
+    _write_minimal_tone_library(tmp_path)
+    settings = json.loads((tmp_path / "settings.json").read_text(encoding="utf-8"))
+    settings["orchestrator"]["use_live_stage2_pipeline"] = True
+    settings["api"] = {"chatgpt": {"model": "gpt-4o-mini"}}
+    (tmp_path / "settings.json").write_text(json.dumps(settings), encoding="utf-8")
+
+    monkeypatch.setattr(
+        "src.core.orchestrator.get_deepseek_api_key_with_openai_fallback",
+        lambda: "deepseek-key",
+    )
+    monkeypatch.setattr("src.core.orchestrator.get_openai_api_key", lambda: "openai-key")
+
+    mock_hybrid = MagicMock()
+    mock_hybrid.generate_script = MagicMock(
+        return_value={"topic": "Hybrid Topic", "script": "Hybrid script body."}
+    )
+    mock_verifier = MagicMock()
+    mock_verifier.verify_script = MagicMock(
+        return_value={
+            "result": "PASS",
+            "scores": {"clarity": 90, "flow": 90, "engagement": 80, "issues_count": 0},
+            "feedback": "ok",
+            "suggestion": "ok",
+            "attempt": 1,
+            "timestamp": "t",
+        }
+    )
+    mock_tone = MagicMock()
+    mock_tone.identify_content_type = MagicMock(return_value="tutorial")
+    mock_tone.get_applicable_tones = MagicMock(return_value=[{"id": "x", "name": "X"}])
+    mock_tone.select_random_tone = MagicMock(
+        return_value={"id": "professional_educational", "name": "Professional Educational"}
+    )
+
+    with patch("src.core.orchestrator.HybridScriptGenerator", return_value=mock_hybrid), patch(
+        "src.core.orchestrator.AgentVerifier", return_value=mock_verifier
+    ), patch("src.core.orchestrator.ToneManager", return_value=mock_tone):
+        orch = VideoProductionOrchestrator(str(tmp_path))
+        out = orch.generate_video(topic=None, category="general")
+
+    assert out["success"] is True
+    assert out["topic"] == "Hybrid Topic"
+    assert out["script"] == "Hybrid script body."
+    assert out["agent_verification_passed"] is True
+    assert "professional_educational" in out["tone_used"]
+    mock_hybrid.generate_script.assert_called_once()
+    mock_verifier.verify_script.assert_called_once()
+    mock_tone.identify_content_type.assert_called_once()
 
 
 def test_config_loader_init(tmp_path: Path) -> None:

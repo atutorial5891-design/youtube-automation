@@ -11,7 +11,12 @@ from typing import Any, Callable
 
 from src.core.config_loader import ConfigLoader
 from src.core.logger import build_logger
+from src.generation.script_generator import HybridScriptGenerator
+from src.generation.tone_manager import ToneManager
+from src.quality.agent_verifier import MAX_SCRIPT_RETRIES, AgentVerifier
 from src.utils.constants import PROJECT_ROOT
+from src.utils.exceptions import ExternalServiceError
+from src.utils.llm_keys import get_deepseek_api_key_with_openai_fallback, get_openai_api_key
 
 
 def _resolve_config_directory(config_path: str) -> Path:
@@ -35,11 +40,10 @@ def _resolve_config_directory(config_path: str) -> Path:
 class VideoProductionOrchestrator:
     """Coordinate topic, script, verification, tone, TTS, images, and assembly.
 
-    Client integrations (DeepSeek, ChatGPT, agent verifier, tone manager, TTS,
-    image generator, video assembler) are stored as placeholders until their
-    respective stages are wired in. The pipeline still runs end-to-end using
-    configuration-driven placeholders so tests and smoke runs can validate
-    flow, logging, and error handling.
+    Optional **live Stage 2** wiring (hybrid script + Gate 2 verifier + tone
+    selection) activates when ``orchestrator.use_live_stage2_pipeline`` is true
+    and API keys resolve; otherwise placeholders cover script, verify, and
+    tone steps. TTS, image generation, and assembly remain pluggable.
     """
 
     def __init__(self, config_path: str) -> None:
@@ -74,7 +78,66 @@ class VideoProductionOrchestrator:
             "tone manager, TTS, image generator, video assembler."
         )
 
+        self._hybrid: HybridScriptGenerator | None = None
+        self._try_init_live_stage2()
+
         self._last_run_state: dict[str, Any] = {}
+
+    def _try_init_live_stage2(self) -> None:
+        """Optionally wire hybrid script gen, Gate 2 verifier, and tone manager.
+
+        Enabled when ``orchestrator.use_live_stage2_pipeline`` is true in
+        settings and both DeepSeek and OpenAI keys resolve. On failure, logs
+        and leaves Stage 2 clients unset so placeholder steps still run.
+        """
+        if not bool(self.config.get_setting("orchestrator.use_live_stage2_pipeline", False)):
+            return
+
+        ds_key = (get_deepseek_api_key_with_openai_fallback() or "").strip()
+        openai_key = (get_openai_api_key() or "").strip()
+        if not ds_key or not openai_key:
+            self._logger.warning(
+                "orchestrator.use_live_stage2_pipeline is true but DeepSeek or "
+                "OpenAI key is missing; continuing with placeholder script/verify/tone."
+            )
+            return
+
+        tone_path = self._config_dir / "tone_library.json"
+        if not tone_path.is_file():
+            self._logger.warning(
+                "Live Stage 2 skipped: tone_library.json missing at %s", tone_path
+            )
+            return
+
+        model = str(self.config.get_setting("api.chatgpt.model", "gpt-4o-mini"))
+        try:
+            self._hybrid = HybridScriptGenerator(
+                ds_key,
+                openai_key,
+                chatgpt_model=model,
+                config_loader=self.config,
+            )
+            self.agent_verifier = AgentVerifier(openai_key, model=model)
+            self.tone_manager = ToneManager(
+                str(tone_path),
+                chatgpt_key=openai_key,
+                openai_model=model,
+            )
+            self.deepseek_client = self._hybrid._deepseek
+            self.chatgpt_client = self._hybrid._writer
+            self._logger.info(
+                "Live Stage 2 clients active (hybrid script, Gate 2 verifier, tone manager)."
+            )
+        except Exception as exc:  # noqa: BLE001
+            self._logger.warning(
+                "Live Stage 2 wiring failed (%s); using placeholder steps.", exc,
+                exc_info=True,
+            )
+            self._hybrid = None
+            self.agent_verifier = None
+            self.tone_manager = None
+            self.deepseek_client = None
+            self.chatgpt_client = None
 
     def _apply_log_level_from_settings(self) -> None:
         """Set logger and handler levels from ``settings.json``."""
@@ -169,9 +232,13 @@ class VideoProductionOrchestrator:
         """Run the full video production workflow for one topic.
 
         Stages (in order): topic generation, script generation, agent
-        verification, tone variation, TTS, images, video assembly. Real API
-        calls are not performed yet; values are driven from configuration and
-        placeholders.
+        verification, tone variation, TTS, images, video assembly.
+
+        When ``orchestrator.use_live_stage2_pipeline`` is true and API keys are
+        available, hybrid DeepSeek+OpenAI script generation and Gate 2
+        :class:`AgentVerifier` run with up to ``1 + MAX_SCRIPT_RETRIES`` attempts,
+        and :class:`ToneManager` selects ``tone_used``. Otherwise placeholders
+        and config templates are used (no network I/O).
 
         Args:
             topic: Optional explicit topic. When omitted, the configured default
@@ -191,70 +258,124 @@ class VideoProductionOrchestrator:
         )
 
         try:
+            use_live = self._hybrid is not None and self.agent_verifier is not None
 
-            def step_topic(res: dict[str, Any]) -> None:
-                if topic:
-                    res["topic"] = topic
-                else:
-                    default_topic = self.config.get_setting(
-                        "orchestrator.default_topic",
+            if use_live:
+
+                def step_live_script_gate2(res: dict[str, Any]) -> None:
+                    max_attempts = MAX_SCRIPT_RETRIES + 1
+                    locked_topic: str | None = (
+                        topic.strip() if isinstance(topic, str) and topic.strip() else None
+                    )
+                    for attempt in range(1, max_attempts + 1):
+                        assert self._hybrid is not None and self.agent_verifier is not None
+                        bundle = self._hybrid.generate_script(
+                            category,
+                            topic=locked_topic,
+                        )
+                        if locked_topic is None:
+                            locked_topic = bundle["topic"]
+                        res["topic"] = bundle["topic"]
+                        res["script"] = bundle["script"]
+                        verdict = self.agent_verifier.verify_script(
+                            res["script"],
+                            topic=res["topic"],
+                            attempt=attempt,
+                        )
+                        if verdict["result"] == "PASS":
+                            res["agent_verification_passed"] = True
+                            self._logger.info("Gate 2 PASS attempt=%s", attempt)
+                            return
+                        self._logger.warning(
+                            "Gate 2 agent verification FAIL (attempt %s/%s)",
+                            attempt,
+                            max_attempts,
+                        )
+                    res["agent_verification_passed"] = False
+                    raise ExternalServiceError(
+                        "Gate 2 agent verification failed after "
+                        f"{max_attempts} attempt(s). See logs for verifier feedback."
+                    )
+
+                if not self._run_step(
+                    "hybrid_script_and_verification",
+                    result,
+                    step_live_script_gate2,
+                    start,
+                ):
+                    return result
+
+            else:
+
+                def step_topic(res: dict[str, Any]) -> None:
+                    if topic:
+                        res["topic"] = topic
+                    else:
+                        default_topic = self.config.get_setting(
+                            "orchestrator.default_topic",
+                            None,
+                        )
+                        if not default_topic or not isinstance(default_topic, str):
+                            raise ValueError(
+                                "No topic provided and settings key "
+                                "'orchestrator.default_topic' is missing or not a string. "
+                                "Set orchestrator.default_topic in config/settings.json "
+                                "or pass topic= to generate_video()."
+                            )
+                        res["topic"] = str(default_topic)
+                    self._logger.debug("Topic resolved: %s", res["topic"])
+
+                if not self._run_step("topic_generation", result, step_topic, start):
+                    return result
+
+                def step_script(res: dict[str, Any]) -> None:
+                    template = self.config.get_setting(
+                        "orchestrator.placeholder_script_template",
                         None,
                     )
-                    if not default_topic or not isinstance(default_topic, str):
+                    if not template or not isinstance(template, str):
                         raise ValueError(
-                            "No topic provided and settings key "
-                            "'orchestrator.default_topic' is missing or not a string. "
-                            "Set orchestrator.default_topic in config/settings.json "
-                            "or pass topic= to generate_video()."
+                            "settings key 'orchestrator.placeholder_script_template' "
+                            "must be a non-empty string in config/settings.json."
                         )
-                    res["topic"] = str(default_topic)
-                self._logger.debug("Topic resolved: %s", res["topic"])
-
-            if not self._run_step("topic_generation", result, step_topic, start):
-                return result
-
-            def step_script(res: dict[str, Any]) -> None:
-                template = self.config.get_setting(
-                    "orchestrator.placeholder_script_template",
-                    None,
-                )
-                if not template or not isinstance(template, str):
-                    raise ValueError(
-                        "settings key 'orchestrator.placeholder_script_template' "
-                        "must be a non-empty string in config/settings.json."
+                    res["script"] = template.format(
+                        topic=res["topic"],
+                        category=category,
                     )
-                res["script"] = template.format(
-                    topic=res["topic"],
-                    category=category,
-                )
 
-            if not self._run_step("script_generation", result, step_script, start):
-                return result
+                if not self._run_step("script_generation", result, step_script, start):
+                    return result
 
-            def step_agent(res: dict[str, Any]) -> None:
-                # Placeholder: real AgentVerifier integration in a later stage.
-                _ = self.agent_verifier
-                res["agent_verification_passed"] = bool(
-                    self.config.get_setting(
-                        "orchestrator.placeholder_agent_pass",
-                        True,
+                def step_agent(res: dict[str, Any]) -> None:
+                    _ = self.agent_verifier
+                    res["agent_verification_passed"] = bool(
+                        self.config.get_setting(
+                            "orchestrator.placeholder_agent_pass",
+                            True,
+                        )
                     )
-                )
 
-            if not self._run_step("agent_verification", result, step_agent, start):
-                return result
+                if not self._run_step("agent_verification", result, step_agent, start):
+                    return result
 
             def step_tone(res: dict[str, Any]) -> None:
-                _ = self.tone_manager
-                tone = self.config.get_setting(
-                    "orchestrator.placeholder_tone",
-                    "general",
-                )
-                if not isinstance(tone, str):
-                    raise ValueError(
-                        "settings key 'orchestrator.placeholder_tone' must be a string."
+                if self.tone_manager is not None:
+                    content_label = self.tone_manager.identify_content_type(res["script"])
+                    applicable = self.tone_manager.get_applicable_tones(content_label)
+                    picked = self.tone_manager.select_random_tone(applicable)
+                    tone_id = str(picked.get("id", "unknown"))
+                    tone_name = str(picked.get("name", tone_id))
+                    res["tone_used"] = f"{tone_id}:{tone_name}"
+                else:
+                    tone = self.config.get_setting(
+                        "orchestrator.placeholder_tone",
+                        "general",
                     )
-                res["tone_used"] = tone
+                    if not isinstance(tone, str):
+                        raise ValueError(
+                            "settings key 'orchestrator.placeholder_tone' must be a string."
+                        )
+                    res["tone_used"] = tone
 
             if not self._run_step("tone_variation", result, step_tone, start):
                 return result

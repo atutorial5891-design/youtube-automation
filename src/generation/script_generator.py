@@ -86,11 +86,20 @@ class HybridScriptGenerator:
         logger.warning("DeepSeek step %s returned empty; retrying once.", label)
         return fn(*args, **kwargs)
 
-    def generate_script(self, category: str = "general") -> dict[str, Any]:
+    def generate_script(
+        self,
+        category: str = "general",
+        *,
+        topic: str | None = None,
+    ) -> dict[str, Any]:
         """Run topic → outline → script and attach cost metadata.
 
         Args:
-            category: Niche/category label forwarded to DeepSeek topic generation.
+            category: Niche/category label forwarded to DeepSeek topic generation
+                when ``topic`` is not provided.
+            topic: When set, skips DeepSeek topic generation and uses this string
+                for outline + script (orchestrator-supplied topic). Estimated
+                DeepSeek cost excludes topic generation in that case.
 
         Returns:
             Dictionary with topic, outline, script, cost breakdown, timestamps,
@@ -108,31 +117,37 @@ class HybridScriptGenerator:
             )
 
         ds_topic_cost, ds_outline_cost, cg_script_cost = self._estimated_costs()
+        topic_locked = (topic or "").strip()
         logger.info(
-            "Hybrid generate_script start category=%r "
+            "Hybrid generate_script start category=%r topic_locked=%s "
             "est_costs ds_topic=%.4f ds_outline=%.4f writer=%.4f",
             category_clean,
+            bool(topic_locked),
             ds_topic_cost,
             ds_outline_cost,
             cg_script_cost,
         )
 
-        topic = self._retry_deepseek(
-            "generate_topic",
-            self._deepseek.generate_topic,
-            category_clean,
-            True,
-        )
-        if not topic:
-            raise ExternalServiceError(
-                "DeepSeek could not generate a topic after one retry. "
-                "Check API key, quota, and network connectivity."
+        if topic_locked:
+            topic_resolved = topic_locked
+            logger.info("Using caller-supplied topic; skipping DeepSeek topic generation.")
+        else:
+            topic_resolved = self._retry_deepseek(
+                "generate_topic",
+                self._deepseek.generate_topic,
+                category_clean,
+                True,
             )
+            if not topic_resolved:
+                raise ExternalServiceError(
+                    "DeepSeek could not generate a topic after one retry. "
+                    "Check API key, quota, and network connectivity."
+                )
 
         outline = self._retry_deepseek(
             "create_outline",
             self._deepseek.create_outline,
-            topic,
+            topic_resolved,
             "short",
         )
         if not outline:
@@ -142,20 +157,25 @@ class HybridScriptGenerator:
             )
 
         script = self._writer.write_script(
-            topic,
+            topic_resolved,
             outline=outline,
             style="youtube_faceless",
         )
 
+        deepseek_usd = (
+            round(ds_outline_cost, 6)
+            if topic_locked
+            else round(ds_topic_cost + ds_outline_cost, 6)
+        )
         api_split = {
-            "deepseek": round(ds_topic_cost + ds_outline_cost, 6),
+            "deepseek": deepseek_usd,
             "chatgpt": round(cg_script_cost, 6),
         }
         api_cost = round(api_split["deepseek"] + api_split["chatgpt"], 6)
         timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
         payload: dict[str, Any] = {
-            "topic": topic,
+            "topic": topic_resolved,
             "outline": outline,
             "script": script,
             "category": category_clean,
