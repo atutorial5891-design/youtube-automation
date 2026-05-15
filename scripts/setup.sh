@@ -45,6 +45,7 @@ mkdir -p \
   data/pending_scripts \
   data/approved_scripts \
   data/generated_videos \
+  data/generated_videos/images \
   data/published_videos \
   data/analytics
 

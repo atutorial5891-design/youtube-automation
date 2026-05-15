@@ -140,6 +140,16 @@ uv run --extra dev pytest tests/test_agent_verifier.py -v
 
 # Stage 2 tone manager (library + OpenAI variations)
 uv run --extra dev pytest tests/test_tone_manager.py -v
+
+# Stage 2 Google TTS handler (WAV + SSML helpers)
+uv run --extra dev pytest tests/test_tts_handler.py -v
+
+# Stage 2 Ollama image generator (placeholders when Ollama down)
+uv run --extra dev pytest tests/test_image_generator.py -v
+
+# Stage 2 video assembly + structured logging + performance monitor
+uv run --extra dev pytest tests/test_video_assembler.py -v
+uv run --extra dev pytest tests/test_video_pipeline.py -v
 ```
 
 ### 6. Smoke-test external APIs (optional, needs credentials)
@@ -227,8 +237,12 @@ Cheap, high-volume analytical work is separated from quality-critical creative w
 - **`ChatGPTClient`** (`src/api/chatgpt_client.py`) — OpenAI or Anthropic SDK for `write_script` (hook/body/CTA instructions); raises `ExternalServiceError` on failure (no client-side retries).
 - **`AgentVerifier`** (`src/quality/agent_verifier.py`) — **Gate 2**: OpenAI-only structured JSON scoring (`clarity` / `flow` / `engagement` 0–100, `issues_count` for critical issues only). **PASS** when clarity ≥80, flow ≥80, engagement ≥70, and `issues_count == 0`. Prompts from `config/agent_prompts.json` (`verification`). One API call per `verify_script()`; orchestration should target **≥80% first-pass** and may retry the **script** up to **`AgentVerifier.MAX_SCRIPT_RETRIES` (3)** times total per gate design. Optional keyword `attempt=` labels the returned dict.
 - **`ToneManager`** (`src/generation/tone_manager.py`) — loads ``config/tone_library.json`` (``tones`` array with ``id``, ``best_for``, ``variations``). Heuristic ``identify_content_type(script)``, ``get_applicable_tones``, ``select_random_tone`` (fallback ``professional_educational``), and ``generate_variations`` via OpenAI (2–3 rewrites). Tracks ``last_variation_cost_usd`` using ``meta.estimated_usd_per_chatgpt_variation``. Tests: ``pytest tests/test_tone_manager.py -v``.
+- **`TTSHandler`** (`src/api/google_tts.py`) — Google Cloud Text-to-Speech: ``generate_audio`` returns **WAV** (44.1 kHz mono 16-bit PCM), ``add_ssml_formatting``, ``validate_audio_quality``. Service-account JSON + project id. **`GoogleTTSClient`** is a credentials-path helper for ``scripts/test_apis.py``. Tests: ``pytest tests/test_tts_handler.py -v``.
+- **`ImageGenerator`** (`src/generation/image_generator.py`) — Ollama ``/api/generate`` with raw-PNG or JSON/base64 handling; saves under ``data/generated_videos/images/``. ``select_random_prompt`` / ``generate_with_variation`` read ``config/image_prompts.json``. Placeholder PNGs when Ollama is unavailable. Tests: ``pytest tests/test_image_generator.py -v``.
+- **`VideoAssembler`** (`src/video/video_assembler.py`) — MoviePy **1080p / 30 fps**: ``assemble_video`` (WAV + image paths → timestamped MP4 under ``data/generated_videos/``), ``add_transitions`` (fade / zoom / wipe mix), ``apply_subtitles`` (SRT + **ffmpeg** burn-in to ``*_subtitled.mp4``), ``verify_final_quality`` (duration, resolution, bitrate). Structured logging via ``Logger``. Tests: ``pytest tests/test_video_assembler.py -v`` (subtitle test skips if ``ffmpeg`` is missing).
+- **`Logger`** (`src/core/logger.py`) — Class-based logs under ``logs/daily_logs/``, ``logs/error_logs/``, ``logs/api_logs/``, ``logs/performance_logs/`` (dated files); ``log_api_call``, ``log_video_generation``, ``log_performance``. **``build_logger``** remains the stdlib helper used by ``VideoProductionOrchestrator``.
+- **`PerformanceMonitor`** (`src/core/performance_monitor.py`) — ``track_api_cost``, ``track_duration``, ``get_daily_summary`` (``total_cost``, ``total_videos``, ``avg_duration``, ``errors``); appends JSON lines to API and performance logs.
 - **`FactChecker`** — risky claims before publish.
-- **`VideoAssembler`** — render plan and output.
 - **`YouTubeClient`** — upload readiness and publish.
 - **`VideoProductionOrchestrator`** (`src/core/orchestrator.py`) — Stage 2 pipeline (topic → script → agent verify → tone → TTS → images → assembly). Set ``orchestrator.use_live_stage2_pipeline`` to ``true`` plus DeepSeek/OpenAI keys to run :class:`HybridScriptGenerator`, Gate 2 :class:`AgentVerifier` (up to ``1 + MAX_SCRIPT_RETRIES`` attempts), and :class:`ToneManager` for ``tone_used``; otherwise placeholders and ``placeholder_*`` settings apply. Defaults in ``config/settings.json`` under ``orchestrator``.
 - **`ConfigLoader`** (`src/core/config_loader.py`) — loads `settings.json`, `agent_prompts.json`, and `script_prompts.json` at construction; dotted `get_setting()` paths; `load_json()` / `load_tones()` for other config files.
