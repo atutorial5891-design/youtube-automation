@@ -470,9 +470,9 @@ if [ "$passed" -eq "$checks" ]; then
     echo "✅ READY FOR STAGE 3"
     echo ""
     echo "Next steps:"
-    echo "1. Read: STAGE_3_QUICK_START.md"
-    echo "2. Read: STAGE_3_FIXES_AND_CLARIFICATIONS.md"
-    echo "3. Review: STAGE_3_EXECUTION_PLAN.md"
+    echo "1. Read: STAGE_3_START_HERE.md"
+    echo "2. Read: STAGE_3_IMPLEMENTATION_GUIDE.md"
+    echo "3. Use: STAGE_3_CURSOR_PROMPT_SESSION_1_UPDATED.md"
     echo "4. Start implementing Stage 3"
 else
     echo "❌ NOT READY FOR STAGE 3"
@@ -511,10 +511,10 @@ fi
 
 Read these documents in order:
 
-1. **STAGE_3_QUICK_START.md** (5 min) - Overview
-2. **STAGE_3_FIXES_AND_CLARIFICATIONS.md** (10 min) - Implementation details
-3. **STAGE_3_EXECUTION_PLAN.md** (20 min) - Original plan
-4. **Start implementing** Stage 3
+1. **STAGE_3_START_HERE.md** (5 min) - Quick orientation
+2. **STAGE_3_IMPLEMENTATION_GUIDE.md** (15 min) - Day-by-day plan
+3. **STAGE_3_CURSOR_PROMPT_SESSION_1_UPDATED.md** - Start implementing Days 1-2
+4. **Continue** with Sessions 2 & 3
 
 ---
 

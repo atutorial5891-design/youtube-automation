@@ -31,7 +31,7 @@ ls -lh data/approved_scripts/*_metadata.json | wc -l
 
 ### **TOMORROW - Days 1-2 (2-3 hours):**
 
-Use Cursor prompt: **`STAGE_3_CURSOR_PROMPT_SESSION_1_DAYS_1_2.md`**
+Use Cursor prompt: **`STAGE_3_CURSOR_PROMPT_SESSION_1_UPDATED.md`**
 
 **What you'll build:**
 - Fact-checker that reads scripts
@@ -46,7 +46,7 @@ Use Cursor prompt: **`STAGE_3_CURSOR_PROMPT_SESSION_1_DAYS_1_2.md`**
 
 ### **Day 3 (1-2 hours):**
 
-Use Cursor prompt: **`STAGE_3_CURSOR_PROMPT_SESSION_2_DAY_3.md`**
+Use Cursor prompt: **`STAGE_3_CURSOR_PROMPT_SESSION_2_UPDATED.md`**
 
 **What you'll build:**
 - Human review system
@@ -61,7 +61,7 @@ Use Cursor prompt: **`STAGE_3_CURSOR_PROMPT_SESSION_2_DAY_3.md`**
 
 ### **Days 4-7 (1-2 hours per day):**
 
-Use Cursor prompt: **`STAGE_3_CURSOR_PROMPT_SESSION_3_DAYS_4_7.md`**
+Use Cursor prompt: **`STAGE_3_CURSOR_PROMPT_SESSION_3_UPDATED.md`**
 
 **What you'll build:**
 - Quality gates validator
@@ -83,26 +83,18 @@ Use Cursor prompt: **`STAGE_3_CURSOR_PROMPT_SESSION_3_DAYS_4_7.md`**
 
 | File | Days | Use When |
 |------|------|----------|
-| STAGE_3_CURSOR_PROMPT_SESSION_1_DAYS_1_2.md | 1-2 | Ready to implement fact-checking |
-| STAGE_3_CURSOR_PROMPT_SESSION_2_DAY_3.md | 3 | Fact-checking complete |
-| STAGE_3_CURSOR_PROMPT_SESSION_3_DAYS_4_7.md | 4-7 | Human review complete |
+| STAGE_3_CURSOR_PROMPT_SESSION_1_UPDATED.md | 1-2 | Ready to implement fact-checking |
+| STAGE_3_CURSOR_PROMPT_SESSION_2_UPDATED.md | 3 | Fact-checking complete |
+| STAGE_3_CURSOR_PROMPT_SESSION_3_UPDATED.md | 4-7 | Human review complete |
 
 ### **Implementation & Reference Guides**
 
 | File | Purpose | When to Read |
 |------|---------|--------------|
 | STAGE_3_IMPLEMENTATION_GUIDE.md | Step-by-step execution plan | Before starting (read first!) |
-| STAGE_3_QUICK_START.md | High-level overview | Quick reference during work |
-| STAGE_3_FIXES_AND_CLARIFICATIONS.md | Technical specifications | If you need implementation details |
-| STAGE_3_EXECUTION_PLAN.md | Original detailed plan | Reference for comprehensive specs |
-
-### **Supporting Documentation**
-
-| File | Purpose |
-|------|---------|
-| STAGE_2_FINAL_LOCKDOWN.md | What Stage 2 produced (reference) |
-| STAGE_2_TO_STAGE_3_ALIGNMENT_ANALYSIS.md | How stages connect (reference) |
-| DOCUMENTATION_ROADMAP.md | Guide to all documents (reference) |
+| STAGE_3_DOCUMENTATION_INDEX.md | Detailed Stage 3 index | Navigation & reference |
+| STAGE_3_TROUBLESHOOTING.md | Debug common issues | When you encounter problems |
+| STAGE_3_TO_STAGE_4_ALIGNMENT.md | Transition to Stage 4 | After completing Stage 3 |
 
 ### **Mock Data (Already Created)**
 
@@ -122,19 +114,19 @@ data/approved_scripts/         (5 metadata JSON files)
 
 ### **Option A: Follow the Guide (Recommended)**
 1. Read `STAGE_3_IMPLEMENTATION_GUIDE.md` (15 min)
-2. Tomorrow: Use `STAGE_3_CURSOR_PROMPT_SESSION_1_DAYS_1_2.md`
+2. Tomorrow: Use `STAGE_3_CURSOR_PROMPT_SESSION_1_UPDATED.md`
 3. Continue Days 3-7 with other prompts
 
 ### **Option B: Jump Straight In**
-1. Copy the entire text from `STAGE_3_CURSOR_PROMPT_SESSION_1_DAYS_1_2.md`
+1. Copy the entire text from `STAGE_3_CURSOR_PROMPT_SESSION_1_UPDATED.md`
 2. Paste into Cursor
 3. Start implementing
 
 ### **Option C: Just Want the Prompts?**
 All 3 prompts are in:
-- `STAGE_3_CURSOR_PROMPT_SESSION_1_DAYS_1_2.md` (Days 1-2)
-- `STAGE_3_CURSOR_PROMPT_SESSION_2_DAY_3.md` (Day 3)
-- `STAGE_3_CURSOR_PROMPT_SESSION_3_DAYS_4_7.md` (Days 4-7)
+- `STAGE_3_CURSOR_PROMPT_SESSION_1_UPDATED.md` (Days 1-2)
+- `STAGE_3_CURSOR_PROMPT_SESSION_2_UPDATED.md` (Day 3)
+- `STAGE_3_CURSOR_PROMPT_SESSION_3_UPDATED.md` (Days 4-7)
 
 Copy each entire prompt block and paste into Cursor.
 
@@ -192,10 +184,10 @@ Output: Final decision report
 | Issue | Solution |
 |-------|----------|
 | "How do I use these prompts?" | Read STAGE_3_IMPLEMENTATION_GUIDE.md |
-| "What's the technical spec?" | Check STAGE_3_FIXES_AND_CLARIFICATIONS.md |
-| "Why is it structured this way?" | See STAGE_3_EXECUTION_PLAN.md |
-| "Tests failing?" | Check STAGE_2_TROUBLESHOOTING.md |
-| "Can't load data?" | See STAGE_2_TO_STAGE_3_ALIGNMENT_ANALYSIS.md |
+| "What are the technical details?" | Check STAGE_3_DOCUMENTATION_INDEX.md |
+| "Tests failing or stuck?" | See STAGE_3_TROUBLESHOOTING.md |
+| "How do I move to Stage 4?" | Read STAGE_3_TO_STAGE_4_ALIGNMENT.md |
+| "Need complete file list?" | Use the README.md in docs/ folder |
 
 ---
 
@@ -205,11 +197,11 @@ Output: Final decision report
 ```
 1. Read STAGE_3_IMPLEMENTATION_GUIDE.md (15 min)
    ↓
-2. Use STAGE_3_CURSOR_PROMPT_SESSION_1_DAYS_1_2.md (Days 1-2)
+2. Use STAGE_3_CURSOR_PROMPT_SESSION_1_UPDATED.md (Days 1-2)
    ↓
-3. Use STAGE_3_CURSOR_PROMPT_SESSION_2_DAY_3.md (Day 3)
+3. Use STAGE_3_CURSOR_PROMPT_SESSION_2_UPDATED.md (Day 3)
    ↓
-4. Use STAGE_3_CURSOR_PROMPT_SESSION_3_DAYS_4_7.md (Days 4-7)
+4. Use STAGE_3_CURSOR_PROMPT_SESSION_3_UPDATED.md (Days 4-7)
    ↓
 5. Review logs/stage_3_final_report.json
    ↓
@@ -226,7 +218,7 @@ Output: Final decision report
 
 **Next action:**
 1. Read: `STAGE_3_IMPLEMENTATION_GUIDE.md`
-2. Then: Open Cursor and use `STAGE_3_CURSOR_PROMPT_SESSION_1_DAYS_1_2.md`
+2. Then: Open Cursor and use `STAGE_3_CURSOR_PROMPT_SESSION_1_UPDATED.md`
 
 **Good luck! 🚀**
 

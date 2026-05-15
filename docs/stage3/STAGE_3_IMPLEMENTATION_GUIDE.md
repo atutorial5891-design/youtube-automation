@@ -30,9 +30,9 @@ ls -lh data/approved_scripts/*_metadata.json | wc -l
 ```
 
 ✅ **Check you have all required Cursor prompts:**
-- STAGE_3_CURSOR_PROMPT_SESSION_1_DAYS_1_2.md
-- STAGE_3_CURSOR_PROMPT_SESSION_2_DAY_3.md
-- STAGE_3_CURSOR_PROMPT_SESSION_3_DAYS_4_7.md
+- STAGE_3_CURSOR_PROMPT_SESSION_1_UPDATED.md
+- STAGE_3_CURSOR_PROMPT_SESSION_2_UPDATED.md
+- STAGE_3_CURSOR_PROMPT_SESSION_3_UPDATED.md
 
 ---
 
@@ -44,8 +44,8 @@ ls -lh data/approved_scripts/*_metadata.json | wc -l
 
 1. Open Cursor
 2. Navigate to ~/projects/YouTube-Automation/
-3. Open: STAGE_3_CURSOR_PROMPT_SESSION_1_DAYS_1_2.md
-4. **Copy the entire prompt block** (from "PROJECT CONTEXT" to end)
+3. Open: STAGE_3_CURSOR_PROMPT_SESSION_1_UPDATED.md
+4. **Copy the entire prompt block** (from "REQUIREMENT 0" to end)
 5. Paste into Cursor
 6. Run: `pytest tests/test_fact_checker.py -v`
 7. Verify: 5 files in logs/fact_check_reports/
@@ -71,8 +71,8 @@ pytest tests/test_fact_checker.py -v  # Should pass
 **Time:** 1-2 hours
 
 1. Verify Session 1 complete (5 fact-check reports exist)
-2. Open: STAGE_3_CURSOR_PROMPT_SESSION_2_DAY_3.md
-3. **Copy the entire prompt block**
+2. Open: STAGE_3_CURSOR_PROMPT_SESSION_2_UPDATED.md
+3. **Copy the entire prompt block** (from "REQUIREMENT 1" to end)
 4. Paste into Cursor
 5. Run: `pytest tests/test_final_reviewer.py -v`
 6. Verify: 5 files in logs/human_reviews/
@@ -99,8 +99,8 @@ pytest tests/test_final_reviewer.py -v  # Should pass
 **Time:** 1-2 hours per day (4 days total)
 
 1. Verify Sessions 1-2 complete
-2. Open: STAGE_3_CURSOR_PROMPT_SESSION_3_DAYS_4_7.md
-3. **Copy the entire prompt block**
+2. Open: STAGE_3_CURSOR_PROMPT_SESSION_3_UPDATED.md
+3. **Copy the entire prompt block** (from "REQUIREMENT 1" to end)
 4. Paste into Cursor
 5. **Important:** This prompt is large - Cursor may split it into multiple sessions
 6. Complete all requirements in order
@@ -268,9 +268,9 @@ bash verify_stage_3.sh | tee stage_3_verification.log
 
 | Problem | Document |
 |---------|----------|
-| Need to understand prompt | STAGE_3_FIXES_AND_CLARIFICATIONS.md |
-| Tests failing | STAGE_2_TROUBLESHOOTING.md |
-| Can't load Stage 2 data | STAGE_2_TO_STAGE_3_ALIGNMENT_ANALYSIS.md |
+| Need to understand prompt | STAGE_3_DOCUMENTATION_INDEX.md |
+| Tests failing | STAGE_3_TROUBLESHOOTING.md |
+| Session dependencies | STAGE_3_DOCUMENTATION_INDEX.md |
 | Verification checklist | PRE_STAGE_3_VERIFICATION_CHECKLIST.md |
 
 ---

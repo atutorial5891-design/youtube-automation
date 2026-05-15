@@ -110,8 +110,8 @@ ls -lh tests/test_fact_checker.py
 ```
 
 ✅ **If files missing, re-run prompt:**
-- Open STAGE_3_CURSOR_PROMPT_SESSION_1_DAYS_1_2.md
-- Copy REQUIREMENTS 4 (test creation)
+- Open STAGE_3_CURSOR_PROMPT_SESSION_1_UPDATED.md
+- Copy REQUIREMENT 4 (test creation)
 - Paste into Cursor again
 - Run: `pytest tests/test_fact_checker.py -v`
 
@@ -417,8 +417,8 @@ EOF
 
 ✅ **If accuracy below threshold:**
 - Fact-check was too strict
-- Check risk keywords in STAGE_3_FIXES_AND_CLARIFICATIONS.md
-- Re-run with adjusted prompts
+- Review risk assessment in the FactChecker prompts
+- Re-run with adjusted prompts or stricter fact-checking
 
 ✅ **If approval below threshold:**
 - Videos have genuine quality issues
@@ -554,7 +554,7 @@ EOF
 
 # 4. Start over
 echo "✅ Stage 3 reset complete"
-echo "Start from Day 1 with STAGE_3_CURSOR_PROMPT_SESSION_1_DAYS_1_2.md"
+echo "Start from Day 1 with STAGE_3_CURSOR_PROMPT_SESSION_1_UPDATED.md"
 ```
 
 ---
