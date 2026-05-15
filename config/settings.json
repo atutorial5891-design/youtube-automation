@@ -16,7 +16,7 @@
       "max_tokens": 800
     },
     "claude": {
-      "model": "claude-3-5-sonnet-latest",
+      "model": "claude-3-5-haiku-20241022",
       "temperature": 0.8,
       "max_tokens": 800
     },

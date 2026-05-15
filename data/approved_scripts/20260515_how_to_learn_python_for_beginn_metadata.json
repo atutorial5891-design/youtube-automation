@@ -1,0 +1,21 @@
+{
+  "script_id": "20260515_how_to_learn_python_for_beginn",
+  "video_path": "data/generated_videos/20260515_how_to_learn_python_for_beginn.mp4",
+  "script": "Welcome to Python for beginners! In this video, we'll explore the basics of Python programming.\n\nPython is one of the most popular programming languages in the world. According to recent studies, Python powers 40% of startups in Silicon Valley.\n\nFirst, let's understand what Python is. Python was created by Guido van Rossum in 1991. It's known for its simple, readable syntax that makes it perfect for beginners.\n\nTo get started, you'll need to install Python. Visit python.org and download the latest version. Installation takes just 5 minutes.\n\nNext, you'll learn about variables, data types, and control flow. These are the building blocks of any Python program.\n\nRemember, practice is key to mastering Python. Write code every day, start with simple programs, and gradually increase complexity.\n\nThanks for watching! Subscribe for more programming tutorials. Happy coding!",
+  "topic": "How to Learn Python for Beginners",
+  "category": "tutorial",
+  "tone_used": "Professional Educational",
+  "agent_verification_passed": true,
+  "api_cost": 0.28,
+  "api_split": {
+    "deepseek": 0.05,
+    "chatgpt": 0.13,
+    "google_tts": 0.1
+  },
+  "timestamp": "2026-05-15T05:05:11.142399",
+  "duration_seconds": 180.0,
+  "model_versions": {
+    "deepseek_model": "deepseek-chat",
+    "chatgpt_model": "gpt-4o-mini"
+  }
+}

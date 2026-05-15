@@ -1,0 +1,21 @@
+{
+  "script_id": "20260515_the_science_of_sleep:_why_you_",
+  "video_path": "data/generated_videos/20260515_the_science_of_sleep:_why_you_.mp4",
+  "script": "Did you know? Your body needs 7-9 hours of sleep every night for optimal health.\n\nDuring sleep, your brain consolidates memories. This is why students who sleep well perform better on exams.\n\nSleep deprivation affects multiple systems. Studies show that sleep loss increases risk of heart disease by 48% and diabetes by 30%.\n\nYour body repairs itself during sleep. Muscle growth, tissue repair, and immune system strengthening happen while you're asleep.\n\nSleep also affects your mental health. Lack of sleep increases anxiety and depression symptoms by up to 40%.\n\nHere's what you should do: Aim for consistent sleep schedule. Go to bed and wake up at the same time every day.\n\nCreate a sleep-friendly environment. Keep your bedroom cool, dark, and quiet.\n\nAvoid screens 30 minutes before bed. Blue light disrupts melatonin production.\n\nIf you struggle with sleep, try these techniques: meditation, deep breathing, or reading a book.\n\nRemember, good sleep is not a luxury\u2014it's a necessity for your health. Prioritize sleep like you prioritize work. Thanks for watching!",
+  "topic": "The Science of Sleep: Why You Need 8 Hours",
+  "category": "health",
+  "tone_used": "Curious Explainer",
+  "agent_verification_passed": true,
+  "api_cost": 0.28,
+  "api_split": {
+    "deepseek": 0.05,
+    "chatgpt": 0.13,
+    "google_tts": 0.1
+  },
+  "timestamp": "2026-05-15T05:05:11.146859",
+  "duration_seconds": 180.0,
+  "model_versions": {
+    "deepseek_model": "deepseek-chat",
+    "chatgpt_model": "gpt-4o-mini"
+  }
+}

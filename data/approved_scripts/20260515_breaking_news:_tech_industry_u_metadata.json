@@ -1,0 +1,21 @@
+{
+  "script_id": "20260515_breaking_news:_tech_industry_u",
+  "video_path": "data/generated_videos/20260515_breaking_news:_tech_industry_u.mp4",
+  "script": "Good evening! Here are today's top tech news stories.\n\nStory 1: Major AI breakthrough. A new model has achieved 95% accuracy in medical imaging diagnosis. This could revolutionize healthcare.\n\nStory 2: Smartphone market shifts. Global smartphone shipments increased 12% this quarter, led by foldable phones gaining market share.\n\nStory 3: Data privacy regulations. New laws in Europe require companies to delete user data within 30 days of request.\n\nStory 4: Electric vehicle surge. EV sales hit record high with 14 million units sold globally last year.\n\nStory 5: Startup funding. Tech startups raised $150 billion in 2024, despite economic uncertainty.\n\nWhat does this mean for you? Stay updated with technology news. These trends affect our daily lives and job markets.\n\nIf you work in tech, upskilling is crucial. AI, data science, and cybersecurity skills are in high demand.\n\nThat's all for today. Subscribe for daily tech updates. See you tomorrow!",
+  "topic": "Breaking News: Tech Industry Updates",
+  "category": "news",
+  "tone_used": "Conversational Storytelling",
+  "agent_verification_passed": true,
+  "api_cost": 0.28,
+  "api_split": {
+    "deepseek": 0.05,
+    "chatgpt": 0.13,
+    "google_tts": 0.1
+  },
+  "timestamp": "2026-05-15T05:05:11.150242",
+  "duration_seconds": 180.0,
+  "model_versions": {
+    "deepseek_model": "deepseek-chat",
+    "chatgpt_model": "gpt-4o-mini"
+  }
+}

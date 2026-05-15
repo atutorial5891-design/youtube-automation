@@ -11,6 +11,7 @@ src/core/__init__.py
 src/core/config_loader.py
 src/core/logger.py
 src/core/orchestrator.py
+src/core/performance_monitor.py
 src/generation/__init__.py
 src/generation/image_generator.py
 src/generation/script_generator.py
@@ -29,9 +30,13 @@ src/video/video_assembler.py
 src/video/video_validator.py
 tests/test_agent_verifier.py
 tests/test_api_setup.py
+tests/test_image_generator.py
 tests/test_llm_gateway_keys.py
 tests/test_orchestrator.py
 tests/test_script_generator.py
+tests/test_tone_manager.py
+tests/test_tts_handler.py
+tests/test_video_assembler.py
 tests/test_video_pipeline.py
 tests/test_youtube_integration.py
 youtube_automation.egg-info/PKG-INFO

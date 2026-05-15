@@ -9,7 +9,7 @@ description = "Automated YouTube faceless video generation with cost optimizatio
 readme = "README.md"
 requires-python = ">=3.11"
 # LLM keychain helper: sibling ../llm_gateway (https://github.com/atutorial5891-design/llm_gateway)
-# or `pip install -e ../llm_gateway` so `secrets_manager` is importable; see src/utils/llm_keys.py.
+# or `uv pip install -e ../llm_gateway` so `secrets_manager` is importable; see src/utils/llm_keys.py.
 dependencies = [
     "keyring>=25",
     "anthropic",

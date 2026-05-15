@@ -2,29 +2,78 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import sys
 from pathlib import Path
+from typing import Any
+
+logger = logging.getLogger(__name__)
 
 
-def _import_secrets_manager():
+def _mask_secret(raw: str) -> str:
+    if len(raw) <= 8:
+        return "****"
+    return f"{raw[:4]}…{raw[-4:]}"
+
+
+class _EnvOnlySecretsManager:
+    """Keychain-free stub when ``secrets_manager`` or ``keyring`` is unavailable.
+
+    Uses only ``OPENAI_API_KEY`` and ``DEEPSEEK_API_KEY``. Same call shape as
+    llm_gateway's ``SecretsManager`` (``masked`` / ``context``) so tests can
+    monkeypatch the class.
+    """
+
+    @staticmethod
+    def get_openai_key(masked: bool = False, context: Any = None) -> str | None:
+        raw = (os.getenv("OPENAI_API_KEY") or "").strip()
+        if not raw:
+            return None
+        return _mask_secret(raw) if masked else raw
+
+    @staticmethod
+    def get_deepseek_key(masked: bool = False, context: Any = None) -> str | None:
+        raw = (os.getenv("DEEPSEEK_API_KEY") or "").strip()
+        if not raw:
+            return None
+        return _mask_secret(raw) if masked else raw
+
+
+def _import_secrets_manager() -> type:
+    """Load llm_gateway ``SecretsManager`` when possible; else env-only stub."""
     try:
         from secrets_manager import SecretsManager
-    except ImportError:
-        project_root = Path(__file__).resolve().parents[2]
-        sibling = project_root.parent / "llm_gateway"
-        if not sibling.is_dir():
-            raise ImportError(
-                "secrets_manager is not installed and ../llm_gateway was not found. "
-                "Install with: uv pip install -e ../llm_gateway "
-                "or add llm-gateway-secrets to your environment.",
-            ) from None
+
+        return SecretsManager
+    except (ImportError, ModuleNotFoundError):
+        pass
+
+    project_root = Path(__file__).resolve().parents[2]
+    sibling = project_root.parent / "llm_gateway"
+    if sibling.is_dir():
         path = str(sibling)
         if path not in sys.path:
             sys.path.insert(0, path)
-        from secrets_manager import SecretsManager
+        try:
+            from secrets_manager import SecretsManager
 
-    return SecretsManager
+            return SecretsManager
+        except (ImportError, ModuleNotFoundError) as exc:
+            logger.warning(
+                "llm_gateway at %s could not be imported (%s). "
+                "Using OPENAI_API_KEY / DEEPSEEK_API_KEY from the environment only. "
+                "Install dependencies with: uv pip install -e .  (includes keyring) "
+                "or: uv pip install -e ../llm_gateway",
+                sibling,
+                exc,
+            )
+
+    logger.warning(
+        "secrets_manager not available; using OPENAI_API_KEY / DEEPSEEK_API_KEY only. "
+        "For keychain support: uv pip install -e ../llm_gateway (and keyring)."
+    )
+    return _EnvOnlySecretsManager
 
 
 SecretsManager = _import_secrets_manager()

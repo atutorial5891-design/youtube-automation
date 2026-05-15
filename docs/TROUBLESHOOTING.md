@@ -5,7 +5,20 @@
 ### `uv` not found
 Install it with `python3 -m pip install uv` and rerun `scripts/setup.sh`.
 
-### Python version too old
+### `pip` not found after `source venv/bin/activate`
+Environments created with **`uv venv`** may not place a **`pip`** executable on `PATH`. Use **`uv`** instead of bare **`pip`**:
+
+```bash
+uv pip install -e ".[dev]"
+```
+
+Or target the venv explicitly from the repo root (no activation required):
+
+```bash
+uv pip install --python ./venv/bin/python -e ".[dev]"
+```
+
+As a last resort: `python -m pip install -e ".[dev]"` if the interpreter has pip available.
 Use Python `3.11+` before creating the virtual environment.
 
 ### Missing Google or YouTube credentials

@@ -1,0 +1,21 @@
+{
+  "script_id": "20260515_quick_dinner_recipes:_15_minut",
+  "video_path": "data/generated_videos/20260515_quick_dinner_recipes:_15_minut.mp4",
+  "script": "Hello! Today I'm showing you three delicious 15-minute dinner recipes.\n\nRecipe 1: Garlic Butter Pasta. Cook pasta, toss with garlic-infused butter, add parmesan cheese. Done in 12 minutes.\n\nRecipe 2: Stir-fry perfection. Slice vegetables, cook in a hot wok with soy sauce and ginger. Ready in 14 minutes.\n\nRecipe 3: Quick tacos. Brown ground beef, add taco seasoning, warm tortillas, add toppings. 10 minutes total.\n\nThe secret to fast cooking is preparation. Wash and chop vegetables before you start cooking.\n\nUse high heat. This cooks food faster while keeping it fresh and crispy.\n\nDon't overcrowd the pan. Give food space to cook properly.\n\nTaste as you cook. Adjust seasonings to your preference.\n\nThese recipes are perfect for busy weeknights. No complicated techniques, no fancy equipment needed.\n\nSubscribe for more quick and easy recipes. Happy cooking!",
+  "topic": "Quick Dinner Recipes: 15 Minutes or Less",
+  "category": "cooking",
+  "tone_used": "Quick & Direct",
+  "agent_verification_passed": true,
+  "api_cost": 0.28,
+  "api_split": {
+    "deepseek": 0.05,
+    "chatgpt": 0.13,
+    "google_tts": 0.1
+  },
+  "timestamp": "2026-05-15T05:05:11.148671",
+  "duration_seconds": 180.0,
+  "model_versions": {
+    "deepseek_model": "deepseek-chat",
+    "chatgpt_model": "gpt-4o-mini"
+  }
+}

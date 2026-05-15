@@ -1,0 +1,21 @@
+{
+  "script_id": "20260515_5_morning_habits_of_successful",
+  "video_path": "data/generated_videos/20260515_5_morning_habits_of_successful.mp4",
+  "script": "Good morning! Let me share five habits that successful people swear by.\n\nFirst habit: Wake up early. Most successful CEOs wake up before 6 AM. This gives them quiet time for planning and exercise.\n\nSecond habit: Exercise. Just 30 minutes of exercise can boost your mood and productivity for the entire day.\n\nThird habit: Healthy breakfast. Don't skip breakfast! A nutritious meal fuels your brain and body.\n\nFourth habit: Plan your day. Spend 10 minutes planning what you want to accomplish. This increases focus and productivity.\n\nFifth habit: Learn something new. Read, listen to podcasts, or take a course. Continuous learning is what sets successful people apart.\n\nThese habits are simple but powerful. Start with one habit and add more gradually. Remember, success is built on small daily actions.\n\nWhat habits do you follow? Let me know in the comments. Subscribe for more self-improvement tips!",
+  "topic": "5 Morning Habits of Successful People",
+  "category": "lifestyle",
+  "tone_used": "Energetic Motivational",
+  "agent_verification_passed": true,
+  "api_cost": 0.28,
+  "api_split": {
+    "deepseek": 0.05,
+    "chatgpt": 0.13,
+    "google_tts": 0.1
+  },
+  "timestamp": "2026-05-15T05:05:11.144862",
+  "duration_seconds": 180.0,
+  "model_versions": {
+    "deepseek_model": "deepseek-chat",
+    "chatgpt_model": "gpt-4o-mini"
+  }
+}

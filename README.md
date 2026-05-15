@@ -72,6 +72,14 @@ source venv/bin/activate          # Windows (cmd): venv\Scripts\activate.bat
 uv pip install -e ".[dev]"        # app + pytest, ruff, black, mypy (dev extra)
 ```
 
+**No `pip` command in the shell?** Virtualenvs created with **`uv venv`** often do not expose a **`pip`** executable on `PATH`. Prefer **`uv pip`** (as above). From the repo root without activating the venv you can run:
+
+```bash
+uv pip install --python ./venv/bin/python -e ".[dev]"
+```
+
+If you truly need the `pip` CLI inside the venv, use **`python -m pip`** (after `ensurepip` / a normal install that includes pip).
+
 The setup script also creates `data/` and `logs/` subfolders. If you never run Path A, run `./scripts/setup.sh` once anyway (it is idempotent) **or** copy the `mkdir -p` block from `scripts/setup.sh` so monitors and stages have the expected paths.
 
 If `.env` does not exist yet:
@@ -198,7 +206,7 @@ Keys can be loaded from [llm_gateway](https://github.com/atutorial5891-design/ll
 **Setup (pick one):**
 
 1. **Sibling repo:** clone `llm_gateway` as `../llm_gateway` (next to this repo). `src/utils/llm_keys.py` prepends that path if `secrets_manager` is not importable.
-2. **Editable install:** `pip install -e ../llm_gateway` or `uv pip install -e ../llm_gateway` from your activated venv.
+2. **Editable install:** `uv pip install -e ../llm_gateway` from the repo root (optionally `--python ./venv/bin/python` if the venv is not activated).
 
 Store accounts as **`openai`** and **`deepseek`** (names are lowercased). Upstream CLI: `llm-gateway-secret`, `llm-gateway-get-secret`.
 

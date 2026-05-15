@@ -102,6 +102,14 @@ source venv/bin/activate          # Windows (cmd): venv\Scripts\activate.bat
 uv pip install -e ".[dev]"        # app + pytest, ruff, black, mypy (dev extra)
 ```
 
+**No `pip` command in the shell?** Virtualenvs created with **`uv venv`** often do not expose a **`pip`** executable on `PATH`. Prefer **`uv pip`** (as above). From the repo root without activating the venv you can run:
+
+```bash
+uv pip install --python ./venv/bin/python -e ".[dev]"
+```
+
+If you truly need the `pip` CLI inside the venv, use **`python -m pip`** (after `ensurepip` / a normal install that includes pip).
+
 The setup script also creates `data/` and `logs/` subfolders. If you never run Path A, run `./scripts/setup.sh` once anyway (it is idempotent) **or** copy the `mkdir -p` block from `scripts/setup.sh` so monitors and stages have the expected paths.
 
 If `.env` does not exist yet:
@@ -158,6 +166,28 @@ uv run --extra dev pytest tests/test_api_setup.py -v
 # LLM keychain resolution + masked print demo (use -s to see prints)
 uv run --extra dev pytest tests/test_llm_gateway_keys.py -v
 uv run --extra dev pytest tests/test_llm_gateway_keys.py::TestLLMGatewaySecretsPrintIntegration -s
+
+# Stage 2 orchestrator + config loader
+uv run --extra dev pytest tests/test_orchestrator.py -v
+
+# Stage 2 hybrid script generator (DeepSeek + OpenAI/Anthropic)
+uv run --extra dev pytest tests/test_script_generator.py -v
+
+# Stage 2 Gate 2 agent verifier (OpenAI JSON scoring)
+uv run --extra dev pytest tests/test_agent_verifier.py -v
+
+# Stage 2 tone manager (library + OpenAI variations)
+uv run --extra dev pytest tests/test_tone_manager.py -v
+
+# Stage 2 Google TTS handler (WAV + SSML helpers)
+uv run --extra dev pytest tests/test_tts_handler.py -v
+
+# Stage 2 Ollama image generator (placeholders when Ollama down)
+uv run --extra dev pytest tests/test_image_generator.py -v
+
+# Stage 2 video assembly + structured logging + performance monitor
+uv run --extra dev pytest tests/test_video_assembler.py -v
+uv run --extra dev pytest tests/test_video_pipeline.py -v
 ```
 
 ### 6. Smoke-test external APIs (optional, needs credentials)
@@ -206,7 +236,7 @@ Keys can be loaded from [llm_gateway](https://github.com/atutorial5891-design/ll
 **Setup (pick one):**
 
 1. **Sibling repo:** clone `llm_gateway` as `../llm_gateway` (next to this repo). `src/utils/llm_keys.py` prepends that path if `secrets_manager` is not importable.
-2. **Editable install:** `pip install -e ../llm_gateway` or `uv pip install -e ../llm_gateway` from your activated venv.
+2. **Editable install:** `uv pip install -e ../llm_gateway` from the repo root (optionally `--python ./venv/bin/python` if the venv is not activated).
 
 Store accounts as **`openai`** and **`deepseek`** (names are lowercased). Upstream CLI: `llm-gateway-secret`, `llm-gateway-get-secret`.
 
@@ -240,15 +270,21 @@ Cheap, high-volume analytical work is separated from quality-critical creative w
 
 ### Components
 
-- **`HybridScriptGenerator`** — DeepSeek research plus a higher-quality writing model.
-- **`DeepSeekClient`** — API key from `get_deepseek_api_key_with_openai_fallback()` unless overridden.
-- **`ChatGPTClient`** — OpenAI configured when `get_openai_api_key()` returns a value.
-- **`AgentVerifier`** — clarity, flow, engagement, risk.
-- **`ToneManager`** — tone profile and 2–3 variations.
+- **`HybridScriptGenerator`** (`src/generation/script_generator.py`) — DeepSeek for **topic + outline only**; OpenAI or Anthropic (`ChatGPTClient`) for **final script only**, per `docs/API_ALLOCATION_BY_STAGE.md`. Estimated USD split is read from `hybrid_generation` in `config/settings.json`. Constructor: `HybridScriptGenerator(deepseek_key, chatgpt_key, chatgpt_model=..., writing_provider="openai"|"anthropic")`. Raises `ExternalServiceError` if DeepSeek fails after one hybrid-level retry on topic/outline; writing errors propagate for orchestrator retries.
+- **`DeepSeekClient`** (`src/api/deepseek_client.py`) — `requests`-based chat completions for `generate_topic` / `create_outline` only (built-in HTTP retries). Returns `None` on hard failure (logged).
+- **`ChatGPTClient`** (`src/api/chatgpt_client.py`) — OpenAI or Anthropic SDK for `write_script` (hook/body/CTA instructions); raises `ExternalServiceError` on failure (no client-side retries).
+- **`AgentVerifier`** (`src/quality/agent_verifier.py`) — **Gate 2**: OpenAI-only structured JSON scoring (`clarity` / `flow` / `engagement` 0–100, `issues_count` for critical issues only). **PASS** when clarity ≥80, flow ≥80, engagement ≥70, and `issues_count == 0`. Prompts from `config/agent_prompts.json` (`verification`). One API call per `verify_script()`; orchestration should target **≥80% first-pass** and may retry the **script** up to **`AgentVerifier.MAX_SCRIPT_RETRIES` (3)** times total per gate design. Optional keyword `attempt=` labels the returned dict.
+- **`ToneManager`** (`src/generation/tone_manager.py`) — loads ``config/tone_library.json`` (``tones`` array with ``id``, ``best_for``, ``variations``). Heuristic ``identify_content_type(script)``, ``get_applicable_tones``, ``select_random_tone`` (fallback ``professional_educational``), and ``generate_variations`` via OpenAI (2–3 rewrites). Tracks ``last_variation_cost_usd`` using ``meta.estimated_usd_per_chatgpt_variation``. Tests: ``pytest tests/test_tone_manager.py -v``.
+- **`TTSHandler`** (`src/api/google_tts.py`) — Google Cloud Text-to-Speech: ``generate_audio`` returns **WAV** (44.1 kHz mono 16-bit PCM), ``add_ssml_formatting``, ``validate_audio_quality``. Service-account JSON + project id. **`GoogleTTSClient`** is a credentials-path helper for ``scripts/test_apis.py``. Tests: ``pytest tests/test_tts_handler.py -v``.
+- **`ImageGenerator`** (`src/generation/image_generator.py`) — Ollama ``/api/generate`` with raw-PNG or JSON/base64 handling; saves under ``data/generated_videos/images/``. ``select_random_prompt`` / ``generate_with_variation`` read ``config/image_prompts.json``. Placeholder PNGs when Ollama is unavailable. Tests: ``pytest tests/test_image_generator.py -v``.
+- **`VideoAssembler`** (`src/video/video_assembler.py`) — MoviePy **1080p / 30 fps**: ``assemble_video`` (WAV + image paths → timestamped MP4 under ``data/generated_videos/``), ``add_transitions`` (fade / zoom / wipe mix), ``apply_subtitles`` (SRT + **ffmpeg** burn-in to ``*_subtitled.mp4``), ``verify_final_quality`` (duration, resolution, bitrate). Structured logging via ``Logger``. Tests: ``pytest tests/test_video_assembler.py -v`` (subtitle test skips if ``ffmpeg`` is missing).
+- **`Logger`** (`src/core/logger.py`) — Class-based logs under ``logs/daily_logs/``, ``logs/error_logs/``, ``logs/api_logs/``, ``logs/performance_logs/`` (dated files); ``log_api_call``, ``log_video_generation``, ``log_performance``. **``build_logger``** remains the stdlib helper used by ``VideoProductionOrchestrator``.
+- **`PerformanceMonitor`** (`src/core/performance_monitor.py`) — ``track_api_cost``, ``track_duration``, ``get_daily_summary`` (``total_cost``, ``total_videos``, ``avg_duration``, ``errors``); appends JSON lines to API and performance logs.
 - **`FactChecker`** — risky claims before publish.
-- **`VideoAssembler`** — render plan and output.
 - **`YouTubeClient`** — upload readiness and publish.
-- **`Orchestrator`** — coordination, retries, gates.
+- **`VideoProductionOrchestrator`** (`src/core/orchestrator.py`) — Stage 2 pipeline (topic → script → agent verify → tone → TTS → images → assembly). Set ``orchestrator.use_live_stage2_pipeline`` to ``true`` plus DeepSeek/OpenAI keys to run :class:`HybridScriptGenerator`, Gate 2 :class:`AgentVerifier` (up to ``1 + MAX_SCRIPT_RETRIES`` attempts), and :class:`ToneManager` for ``tone_used``; otherwise placeholders and ``placeholder_*`` settings apply. Defaults in ``config/settings.json`` under ``orchestrator``.
+- **`ConfigLoader`** (`src/core/config_loader.py`) — loads `settings.json`, `agent_prompts.json`, and `script_prompts.json` at construction; dotted `get_setting()` paths; `load_json()` / `load_tones()` for other config files.
+- **`Orchestrator`** — Stage 1 scaffold used by `scripts/run_stage_1.py`.
 
 ### Data flow
 
@@ -302,6 +338,14 @@ Agent verification -> Fact-check -> Human final review
 - Shared logic: `config/` and `src/`.
 - Overrides via `config_loader.py` without changing the core flow.
 - Logs and analytics partitioned for multi-channel use.
+
+### Stage 2 scope (orchestrator + config)
+
+- **`VideoProductionOrchestrator`**: pass a path to the `config` directory or to `config/settings.json`. Use `generate_video(topic=..., category=...)` or `run_pipeline()`. With `orchestrator.use_live_stage2_pipeline: true` and keys configured, hybrid script + Gate 2 verification + tone selection run for real; otherwise placeholders are used. Returns the usual metadata dict (including `error` / `failed_step` on failure). Logs at INFO or DEBUG when `orchestrator.verbose` is true.
+- **Hybrid script generation (Stage 2, session 2)**: configure `hybrid_generation.*_usd` cost estimates in `settings.json`. Run `uv run --extra dev pytest tests/test_script_generator.py -v`.
+- **Agent verification (Stage 2, session 3 / Gate 2)**: `AgentVerifier(chatgpt_key, model=...)`. Run `uv run --extra dev pytest tests/test_agent_verifier.py -v`.
+- **Tone variation (Stage 2, session 4)**: `ToneManager(tone_library_path=..., chatgpt_key=...)`, `config/tone_library.json`. Run `uv run --extra dev pytest tests/test_tone_manager.py -v`.
+- **Automated tests**: `uv run --extra dev pytest tests/test_orchestrator.py -v`
 
 ### Stage 1 scope (current repo)
 
